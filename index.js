@@ -1,16 +1,20 @@
 const express = require("express");
-const app = express();
-const mongoose = require("mongoose");
-
+require("./seeder");
 const SliderDataSchema = require("./schema/SliderDataSchema");
 const CardImagesSchema = require("./schema/cardImageSchema");
+const jwt = require("jsonwebtoken");
+const User = require("./schema/users");
+const Favourties = require("./schema/favourites");
+const UsersSchema = require("./schema/users");
+const mongoose = require("mongoose");
+const IN_MEMORY_STORE_FOR_KEYS = {};
 
-const port = 5000;
 const cors = require("cors");
+const app = express();
+
 app.use(cors());
-app.get("/", (req, res) => {
-  res.send("hotstar backend");
-});
+app.use(express.json());
+
 mongoose
   .connect("mongodb+srv://admin:3305@hotstar.48age4c.mongodb.net/", {
     useNewUrlParser: true,
@@ -22,6 +26,32 @@ mongoose
   .catch((err) => {
     console.error("Error connecting to MongoDB:", err);
   });
+const secretKey = "asgdawiulyftg37462873gr3y623874y3ifdbsiulag";
+const port = 5000;
+
+app.get("/", (req, res) => {
+  res.send("hotstar backend");
+});
+
+const middlewareFunctionForTokenVerification = (req, res, next) => {
+  console.log(req.path);
+  if (["/GetMyFavouriteCards", "/AddToFavs"].includes(req.path)) {
+    const { token } = req.headers;
+
+    const decodedData = jwt.decode(token);
+
+    if (IN_MEMORY_STORE_FOR_KEYS[decodedData.userId] === token) {
+      console.log("idhr aaye kya");
+      req.userId = decodedData.userId;
+      next();
+    } else {
+      return res.status(401).json({ message: "INVALID TOKEN" });
+    }
+  } else {
+    next();
+  }
+};
+app.use(middlewareFunctionForTokenVerification);
 
 app.get("/Sliderdata", async (req, res) => {
   try {
@@ -38,6 +68,30 @@ app.get("/cardImages", async (req, res) => {
     res.json(cardimage);
   } catch (error) {
     return res.status(500).json({ error: "An error occurred while fetch c" });
+  }
+});
+
+app.post("/Login", async (req, res) => {
+  try {
+    const { username, password } = req.body; // Assuming your frontend sends "username" and "password" keys
+    const user = await UsersSchema.findOne({ username }).lean();
+    if (!user) {
+      return res.status(401).json({ error: "Invalid credentials." });
+    }
+    if (user.password !== password) {
+      return res.status(401).json({ error: "Invalid credentials." });
+    }
+    const tokenObject = {
+      userId: user._id,
+    };
+    const token = jwt.sign(tokenObject, secretKey);
+
+    IN_MEMORY_STORE_FOR_KEYS[user._id] = token;
+
+    res.status(200).json({ message: "Login successful.", token });
+  } catch (error) {
+    console.error("Error processing request:", error);
+    res.status(500).json({ error: "Internal server error." });
   }
 });
 

@@ -129,6 +129,27 @@ app.post("/Login", async (req, res) => {
   }
 });
 
+app.post("/Register", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const existingUser = await User.exists({ username: username });
+
+    if (existingUser) {
+      return res.status(400).json({ error: "Username already exists." });
+    }
+
+    await User.create({
+      username: username,
+      password: password,
+    });
+
+    res.status(201).json({ message: "Registration successful." });
+  } catch (error) {
+    console.error("Error processing request:", error);
+    res.status(500).json({ error: "Internal server error." });
+  }
+});
+
 app.listen(port, () => {
   console.log("server is listening on ", port);
 });

@@ -4,19 +4,24 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "npx nodemon index",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Antriksh-Mahajan/hotstarbackend.git"
   },
-  "author": "",
+  "author": "Antriksh Mahajan",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/Antriksh-Mahajan/hotstarbackend/issues"
   },
   "homepage": "https://github.com/Antriksh-Mahajan/hotstarbackend#readme",
   "dependencies": {
-    "express": "^4.18.2"
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^7.6.2",
+    "nodemon": "^3.0.1"
   }
 }

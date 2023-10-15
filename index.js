@@ -5,7 +5,8 @@ const mongoose = require("mongoose");
 const SliderDataSchema = require("./schema/SliderDataSchema");
 
 const port = 5000;
-
+const cors = require("cors");
+app.use(cors());
 app.get("/", (req, res) => {
   res.send("hotstar backend");
 });

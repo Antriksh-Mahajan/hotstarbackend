@@ -62,6 +62,40 @@ app.get("/Sliderdata", async (req, res) => {
   }
 });
 
+app.get("/GetMyFavouriteCards", async (req, res) => {
+  try {
+    console.log("API TK AA GYE", req.userId);
+    const myFavs = await Favourties.find({ userId: req.userId })
+      .populate("cardId", "image description", CardImagesSchema)
+      .lean();
+    const favs = myFavs.map((fav) => ({ ...fav.cardId }));
+    console.log({ myFavs });
+    return res.status(200).json({ data: favs }); // This line sends the response
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ err }); // This line might also send a response
+  }
+});
+
+app.get("/AddToFavs", async (req, res) => {
+  try {
+    const { userId } = req;
+    const { cardId } = req.query;
+    await Favourties.findOneAndUpdate(
+      {
+        userId,
+        cardId,
+      },
+      { $set: { userId, cardId } },
+      { upsert: true }
+    );
+    return res.status(201).json({ message: "Created successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error });
+  }
+});
+
 app.get("/cardImages", async (req, res) => {
   try {
     const cardimage = await CardImagesSchema.find();

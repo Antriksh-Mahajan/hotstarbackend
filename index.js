@@ -3,6 +3,7 @@ const app = express();
 const mongoose = require("mongoose");
 
 const SliderDataSchema = require("./schema/SliderDataSchema");
+const CardImagesSchema = require("./schema/cardImageSchema");
 
 const port = 5000;
 const cors = require("cors");
@@ -28,6 +29,15 @@ app.get("/Sliderdata", async (req, res) => {
     res.json(SliderData);
   } catch (error) {
     return res.status(500).json({ error: "error occuered" });
+  }
+});
+
+app.get("/cardImages", async (req, res) => {
+  try {
+    const cardimage = await CardImagesSchema.find();
+    res.json(cardimage);
+  } catch (error) {
+    return res.status(500).json({ error: "An error occurred while fetch c" });
   }
 });
 
